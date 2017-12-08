@@ -1,6 +1,7 @@
 package clock
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -29,21 +30,18 @@ func TestBallCount(t *testing.T) {
 	}
 }
 
-func TestIsSameQueue(t *testing.T) {
+func TestReverseSlice(t *testing.T) {
 	cases := []struct {
-		q1, q2 []ball
-		result bool
+		in, expected []int
 	}{
-		{[]ball{1, 2, 3}, []ball{1, 2, 3}, true},  // success
-		{[]ball{1, 2, 3}, []ball{3, 2, 1}, false}, // wrong order
-		{[]ball{1, 2, 3}, []ball{2, 2, 3}, false}, // not same elements
-		{[]ball{1, 2, 3}, []ball{2, 3}, false},    // q1 longer
-		{[]ball{2, 3}, []ball{1, 2, 3}, false},    // q2 longer
+		{[]int{1, 2, 3}, []int{3, 2, 1}},
+		{[]int{2, 1, 3}, []int{3, 1, 2}},
+		{[]int{-1, 2, -3}, []int{-3, 2, -1}},
 	}
 	for _, c := range cases {
-		result := IsSameQueue(c.q1, c.q2)
-		if result != c.result {
-			t.Errorf("IsSameQueue(%v, %v) == %v, want %v ", c.q1, c.q2, result, c.result)
+		result := ReverseSlice(c.in)
+		if !reflect.DeepEqual(result, c.expected) {
+			t.Errorf("ReverseSlice(%v) == %v, got %v ", c.in, c.expected, result)
 		}
 	}
 }

@@ -2,6 +2,7 @@ package clock
 
 import (
 	"errors"
+	"reflect"
 	"time"
 )
 
@@ -9,11 +10,41 @@ func main() {
 
 }
 
-type ball int
 type ballClock struct {
-	main          []ball
-	minute        [4]ball
-	fiveMin, hour [11]ball
+	main, minute, fiveMin, hour []int
+}
+
+func (c *ballClock) addMinute() {
+	/*
+		if minute arm currently has 4
+			move balls in reverse order of addition to main //fn
+			//minuteballs := reverseSlice(c.minute)
+			c.minute.empty() / c.minute = []int
+			c.main = append(c.main, minuteBalls)
+
+			if 5min arm has currently has 11
+				move balls in reverse order of addition to main
+				if hour arm has currently has 11
+					move balls in reverse order of addition to main
+					add ball to main
+				else
+					append ball to hour arm
+			else
+				append ball to 5min arm
+		else
+			append ball to minute arm
+	*/
+}
+
+// ReverseSlice takes a slice and returns a reversed copy of it.
+func ReverseSlice(forward []int) []int {
+	reverse := make([]int, len(forward))
+	copy(reverse, forward)
+
+	for front, back := 0, len(reverse)-1; front < back; front, back = front+1, back-1 {
+		reverse[front], reverse[back] = reverse[back], reverse[front]
+	}
+	return reverse
 }
 
 // CycleDays takes a number of balls and determines the number of 24-hour periods which elapse before the clock returns to its initial ordering.
@@ -25,45 +56,27 @@ func CycleDays(ballCount int) (int, float64, error) {
 		return 0, 0, errors.New("can only run with ballCount between 27 and 127")
 	}
 
-	clock := ballClock{
-		make([]ball, ballCount),
-		[4]ball{},
-		[11]ball{},
-		[11]ball{},
-	}
+	clock := newClock(ballCount)
 
-	for i := range clock.main {
-		clock.main[i] = ball(i)
-	}
-
-	// setup the initial queue structure
-	initialQ := make([]ball, ballCount)
+	// setup the initial stack structure to compare against
+	initialQ := make([]int, ballCount)
 	copy(initialQ, clock.main)
 
 	//run first case before this, otherwise we have an infinite loop here
-	for !IsSameQueue(initialQ, clock.main) {
-		//run logic while it's not the same queue
-
-		//this is going to be logic shared between clock functions
-		//handle minute, fiveminute, etc
-		//method on ballclock?
+	for ok := true; ok; ok = !reflect.DeepEqual(initialQ, clock.main) {
+		clock.addMinute()
 	}
 
 	elapsed := time.Since(start).Seconds()
 	return 0, elapsed, nil
 }
 
-// IsSameQueue compares two slices of ball to verify same values and same ordering
-func IsSameQueue(q1, q2 []ball) bool {
-	if len(q1) != len(q2) {
-		return false
+func newClock(ballCount int) ballClock {
+	clock := ballClock{}
+
+	for i := 1; i <= ballCount; i++ {
+		clock.main = append(clock.main, i)
 	}
 
-	for i, v := range q1 {
-		if v != q2[i] {
-			return false
-		}
-	}
-
-	return true
+	return clock
 }
