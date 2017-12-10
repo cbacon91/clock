@@ -11,7 +11,11 @@ func main() {
 
 }
 
-// BallClock is a thing
+// BallClock is the structure of the ball clock. It has four 'tracks' to represent timekeeping -
+// Main (the deposit / unused balls), Min (representing a single minute), FiveMin (represent batches
+// of five minute intervals), Hour (representing hour increments), and an internal property
+// representing full completions of the clock to know the number of twelve-hour periods or full
+// rotations of the clock have occurred.
 type BallClock struct {
 	twelveHours              int
 	Main, Min, FiveMin, Hour []int
