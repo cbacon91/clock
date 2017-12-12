@@ -89,7 +89,6 @@ func CycleDays(ballCount int) (float32, float64, error) {
 	initialQ := make([]int, ballCount)
 	copy(initialQ, clock.Main)
 
-	//run first case before this, otherwise we have an infinite loop here
 	for ok := true; ok; ok = !reflect.DeepEqual(initialQ, clock.Main) {
 		clock.AddMinute()
 	}
