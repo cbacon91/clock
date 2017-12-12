@@ -1,4 +1,4 @@
-package clock
+package ballclock
 
 import (
 	"encoding/json"
@@ -6,10 +6,6 @@ import (
 	"reflect"
 	"time"
 )
-
-func main() {
-
-}
 
 // BallClock is the structure of the ball clock. It has four 'tracks' to represent timekeeping -
 // Main (the deposit / unused balls), Min (representing a single minute), FiveMin (represent batches

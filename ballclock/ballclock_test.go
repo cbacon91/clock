@@ -1,4 +1,4 @@
-package clock
+package ballclock
 
 import (
 	"errors"
