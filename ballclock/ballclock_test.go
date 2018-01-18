@@ -1,7 +1,6 @@
 package ballclock
 
 import (
-	"errors"
 	"reflect"
 	"testing"
 )
@@ -12,11 +11,12 @@ func TestCycleDays(t *testing.T) {
 		days float32
 		err  error
 	}{
-		{26, 0, errors.New("can only run with ballCount between 27 and 127")},
+		{26, 0, ErrInvalidBallCount},
 		{27, 23, nil},
 		{30, 15, nil},
 		{45, 378, nil},
-		{128, 0, errors.New("can only run with ballCount between 27 and 127")},
+		{128, 0, ErrInvalidBallCount},
+		{123, 108855, nil}, // basically worst case scenario
 	}
 	for _, c := range cases {
 		days, _, err := CycleDays(c.in)
@@ -35,10 +35,10 @@ func TestClock(t *testing.T) {
 		expected       BallClock
 		err            error
 	}{
-		{26, 2, BallClock{}, errors.New("can only run with ballCount between 27 and 127")},
-		{128, 2, BallClock{}, errors.New("can only run with ballCount between 27 and 127")},
-		{30, 0, BallClock{}, errors.New("must specify positive number of minutes to run for")},
-		{30, -100, BallClock{}, errors.New("must specify positive number of minutes to run for")},
+		{26, 2, BallClock{}, ErrInvalidBallCount},
+		{128, 2, BallClock{}, ErrInvalidBallCount},
+		{30, 0, BallClock{}, ErrMinutesNotSpecified},
+		{30, -100, BallClock{}, ErrMinutesNotSpecified},
 		{30, 325, BallClock{0, []int{11, 5, 26, 18, 2, 30, 19, 8, 24, 10, 29, 20, 16, 21, 28, 1, 23, 14, 27, 9}, []int{}, []int{22, 13, 25, 3, 7}, []int{6, 12, 17, 4, 15}}, nil},
 	}
 	for _, c := range cases {

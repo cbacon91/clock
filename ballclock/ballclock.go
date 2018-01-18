@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+// ErrInvalidBallCount is an error thrown if the number of balls supplied is not between 27 and 127.
+var ErrInvalidBallCount = errors.New("can only run with ballCount between 27 and 127")
+// ErrMinutesNotSpecified is an error thrown if the number of minutes to run for is not specified for clock mode 2.
+var ErrMinutesNotSpecified = errors.New("must specify positive number of minutes to run for")
+
 // BallClock is the structure of the ball clock. It has four 'tracks' to represent timekeeping -
 // Main (the deposit / unused balls), Min (representing a single minute), FiveMin (represent batches
 // of five minute intervals), Hour (representing hour increments), and an internal property
@@ -30,7 +35,7 @@ func (c *BallClock) String() string {
 // If Min is full, it appends Min to main in reverse order and attempts to move the
 // ball to fivemin instead. If fivemin is full, it repeats this process with hour. Finally,
 // if hour is full the clock is reset
-func (c *BallClock) AddMinute() {
+func (c *BallClock) AddMinute () bool {
 	//remove from main
 	newBall := c.Main[0] // take the least recently used ball
 	c.Main = c.Main[1:]
@@ -52,15 +57,17 @@ func (c *BallClock) AddMinute() {
 				c.Main = append(c.Main, hourBalls...)
 				c.Main = append(c.Main, newBall)
 				c.twelveHours++
-			} else {
-				c.Hour = append(c.Hour, newBall)
-			}
+				return true
+			} 
+
+			c.Hour = append(c.Hour, newBall)
 		} else {
 			c.FiveMin = append(c.FiveMin, newBall)
 		}
 	} else {
 		c.Min = append(c.Min, newBall)
 	}
+	return false
 }
 
 // ReverseSlice takes a slice and returns a reversed copy of it.
@@ -80,7 +87,7 @@ func CycleDays(ballCount int) (float32, float64, error) {
 	start := time.Now()
 
 	if ballCount < 27 || ballCount > 127 {
-		return 0, 0, errors.New("can only run with ballCount between 27 and 127")
+		return 0, 0, ErrInvalidBallCount
 	}
 
 	clock := newClock(ballCount)
@@ -89,8 +96,8 @@ func CycleDays(ballCount int) (float32, float64, error) {
 	initialQ := make([]int, ballCount)
 	copy(initialQ, clock.Main)
 
-	for ok := true; ok; ok = !reflect.DeepEqual(initialQ, clock.Main) {
-		clock.AddMinute()
+	for ok, isMainTrackFull := true, true; ok; ok = !isMainTrackFull || !reflect.DeepEqual(initialQ, clock.Main) {
+		isMainTrackFull = clock.AddMinute()
 	}
 
 	elapsed := time.Since(start).Seconds()
@@ -103,10 +110,10 @@ func Clock(ballCount, runToMinutes int) (BallClock, float64, error) {
 	var clock BallClock
 
 	if ballCount < 27 || ballCount > 127 {
-		return clock, 0, errors.New("can only run with ballCount between 27 and 127")
+		return clock, 0, ErrInvalidBallCount
 	}
 	if runToMinutes < 1 {
-		return clock, 0, errors.New("must specify positive number of minutes to run for")
+		return clock, 0, ErrMinutesNotSpecified
 	}
 
 	clock = newClock(ballCount)
